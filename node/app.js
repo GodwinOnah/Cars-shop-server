@@ -50,7 +50,7 @@ app.get('/',(req,res)=>{
 
 
 
-app.get('/loginpage',(req,res)=>{//logging in a user
+app.post('/login',(req,res)=>{//logging in a user
 
 	if(req.body.email===myDatabese.users[0].email&&
 
@@ -76,7 +76,7 @@ app.get('/loginpage',(req,res)=>{//logging in a user
 
 
 
-app.post('/singuppage',(req,res)=>{//registering a user
+app.post('/singu',(req,res)=>{//registering a user
 
 	// bcrypt.hash(password,null,null,function(err,hash)){
 
