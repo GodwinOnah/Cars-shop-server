@@ -14,12 +14,12 @@ const postgres=knex({//connecting to database using knex
     port : 3306,
     user : 'Godwin',
     password : '',
-    database : 'CarsDatabase'
+    database : 'DataB'
   }
 });
 
 
-postgres.select('*').from('CarsDatabase').then(data=>{//selecting from database
+postgres.select('*').from('customerdetails').then(data=>{//selecting from database
 		console.log(data);
 
 })
@@ -77,21 +77,26 @@ app.get('/',(req,res)=>{
 
 app.post('/login',(req,res)=>{//logging in a user
 
-	if(req.body.email===myDatabese.users[0].email&&
+	db.select('email','hash').from('login')
+	.where('email','=',req.body.email)
+	.then(data=>{
+		const isValid=bcrypt.compareSync(req.body.password,data[0].hash);
+		if(isValid){
 
-		req.body.password===myDatabese.users[0].password
-		){
+		return	db.select('*').from('customerdetails').where('email','=',req.body.email)
+			.then(user=>{
 
-			res.json('success');
+				res.json(user[0])
+			})
 
-
-	}
-
-		else{
-				res.status(404).json('error logging in');
-
+			.catch(err=>res.status(400).json('Not registered'))
 		}
+		else{res.status(400).json('Wrong credencials'}
 })
+
+	.catch(err=>res.status(400).json('Wrong credencials'))
+
+	})
 
 
 
@@ -103,35 +108,45 @@ app.post('/login',(req,res)=>{//logging in a user
 
 app.post('/singup',(req,res)=>{//registering a user
 
-	const hash=bcrypt.hashsync(password);
+	const hash=bcrypt.hashsync(req.body.password);
 
 	db.transaction(trx=>{
 
 		trx.insert({
 
 			hash:hash,
-			email:email  })
+			email:req.body.email  })
 
 		.into('login')
 		.returning('email')
 		.then(loginEmail=>{
 
-		return db('CarsDatabase')
-				.returnning().
+		return trx('customerdetails')
+				.returnning('*').
 
-				insert(
-						id: '3',
+				insert({
+						
 						name: req.body.name,
+						phoe:,req.body.phone,
 						email: req.body.email,
-						password:req.body.password,
-						entries:0,
-						joined: new Date()
+						address: req.body.address,
+						password:req.body.password
+						// entries:0,
+						// joined: new Date()
 
-				).then(user=>{
+				}).then(user=>{
 
 			res.json(user[0]);
+
+		})
 		
-		}).catch(err=>res.status(400).json('Not registered'))
+		}).then(trx.commit)
+
+		.catch(trx.rollback)
+
+	})
+
+	.catch(err=>res.status(400).json('Not registered'))
 
 })
 
