@@ -3,6 +3,8 @@ const bodyParser=require('body-parser');
 const bcrypt=require('bcrypt-nodejs');
 const cors=require('cors');
 const knex=require('knex');
+const login=require('./Controllers/login')
+const signup=require('./Controllers/singup')
 
 
 
@@ -75,102 +77,33 @@ app.get('/',(req,res)=>{
 
 
 
-app.post('/login',(req,res)=>{//logging in a user
+app.post('/login',(req,res)=>{login.handleLogin(req,res,de,bcrypt)})
 
-	db.select('email','hash').from('login')
-	.where('email','=',req.body.email)
-	.then(data=>{
-		const isValid=bcrypt.compareSync(req.body.password,data[0].hash);
-		if(isValid){
 
-		return	db.select('*').from('customerdetails').where('email','=',req.body.email)
-			.then(user=>{
-
-				res.json(user[0])
-			})
-
-			.catch(err=>res.status(400).json('Not registered'))
-		}
-		else{res.status(400).json('Wrong credencials'}
-})
-
-	.catch(err=>res.status(400).json('Wrong credencials'))
-
-	})
+app.post('/singup',(req,res)=>{signup.handSignup(req,res,de,bcrypt)})
+	
 
 
 
 
 
 
+// app.get('/profile/:id',(req,res)=>{//using Id to fetch user
 
+// 		db.select('*').from('CarsDatabase')
+// 		.where({req.params.id})
+// 		.then(user=>{
 
+// 			if(user.length){
+// 			res.json(user[0])
+// 				}else{
+// 						res.status(400).json('Not found')
 
-app.post('/singup',(req,res)=>{//registering a user
+// 				}
 
-	const hash=bcrypt.hashsync(req.body.password);
+// 		}).catch(err=>res.status(400).json('erro getting user'))
 
-	db.transaction(trx=>{
-
-		trx.insert({
-
-			hash:hash,
-			email:req.body.email  })
-
-		.into('login')
-		.returning('email')
-		.then(loginEmail=>{
-
-		return trx('customerdetails')
-				.returnning('*').
-
-				insert({
-						
-						name: req.body.name,
-						phoe:,req.body.phone,
-						email: req.body.email,
-						address: req.body.address,
-						password:req.body.password
-						// entries:0,
-						// joined: new Date()
-
-				}).then(user=>{
-
-			res.json(user[0]);
-
-		})
-		
-		}).then(trx.commit)
-
-		.catch(trx.rollback)
-
-	})
-
-	.catch(err=>res.status(400).json('Not registered'))
-
-})
-
-
-
-
-
-
-app.get('/profile/:id',(req,res)=>{//using Id to fetch user
-
-		db.select('*').from('CarsDatabase')
-		.where({req.params.id})
-		.then(user=>{
-
-			if(user.length){
-			res.json(user[0])
-				}else{
-						res.status(400).json('Not found')
-
-				}
-
-		}).catch(err=>res.status(400).json('erro getting user'))
-
-	})
+// 	})
 
 
 
@@ -193,18 +126,18 @@ app.get('/profile/:id',(req,res)=>{//using Id to fetch user
 
 
 
-app.post('/image',(req,res)=>{//Calculating entries after adding image
+// app.post('/image',(req,res)=>{//Calculating entries after adding image
 
 
 
-	db('CarsDatabase').where('id','=',req.body.id)
-	.increament('entries',1)
-	.returning('enteries')
-	.then(entries=>{
+// 	db('CarsDatabase').where('id','=',req.body.id)
+// 	.increament('entries',1)
+// 	.returning('enteries')
+// 	.then(entries=>{
 
-			res.json(entries[0]);
-	}).catch(err=>res.status(400).json('erro getting user'))
-		})
+// 			res.json(entries[0]);
+// 	}).catch(err=>res.status(400).json('erro getting user'))
+// 		})
 
 
 
