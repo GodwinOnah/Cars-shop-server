@@ -1,5 +1,12 @@
 const handleSignup=(req,res,db,bycrypt)=>{//registering a user
 
+	const {name,email,phone,address,password}=req.body;//destructuring
+
+	if(!name||!email||!phone||!address||!password){
+
+			res.status(400).json('Wrong credencials')
+	}
+
 const hash=bcrypt.hashsync(req.body.password);
 
 	db.transaction(trx=>{
@@ -19,8 +26,8 @@ const hash=bcrypt.hashsync(req.body.password);
 				insert({
 						
 						name: req.body.name,
-						phoe:,req.body.phone,
-						email: req.body.email,
+						phone:req.body.phone,
+						email: loginEmail[0],
 						address: req.body.address,
 						password:req.body.password
 						// entries:0,
@@ -42,7 +49,7 @@ const hash=bcrypt.hashsync(req.body.password);
 
 }
 
-module.exports{
-handleSignup:handleSignup;
+module.exports={
+handleSignup:handleSignup
 
-}
+};
